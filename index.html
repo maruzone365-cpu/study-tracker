@@ -55,7 +55,6 @@
     <div class="section">
         <h2>📊 주간 공부 통계 (단위: 분)</h2>
         <div id="chart-container">
-            <!-- 여기에 그래프가 그려집니다 -->
             <canvas id="studyChart"></canvas>
         </div>
     </div>
@@ -79,41 +78,30 @@
             li.remove();
         }
 
+        // === 2. 데이터 저장 및 차트 기능 ===
+        let myChart = null; 
 
-        // === 데이터 저장 및 차트 기능 (추가된 부분) ===
-        let myChart = null; // 차트를 담을 변수
-
-        // 오늘의 날짜를 'YYYY-MM-DD' 형태로 가져오는 함수
         function getTodayDate() {
             const today = new Date();
-            // 한국 시간대 기준 날짜를 정확히 구하기 위한 보정
             const offset = today.getTimezoneOffset() * 60000;
             const dateOffset = new Date(today.getTime() - offset);
             return dateOffset.toISOString().split('T')[0]; 
         }
 
-        // 타이머가 1초 흐를 때마다 저장소에 1초씩 누적하는 함수
         function addStudyTime() {
             const today = getTodayDate();
-            // 브라우저 저장소에서 기존 기록 불러오기 (없으면 빈 공간 생성)
             let data = JSON.parse(localStorage.getItem('studyData') || '{}');
-            
-            // 오늘 날짜에 1초 더하기
             data[today] = (data[today] || 0) + 1; 
-            
-            // 다시 브라우저 저장소에 저장하기
             localStorage.setItem('studyData', JSON.stringify(data));
         }
 
-        // 주간 그래프를 그리고 업데이트하는 함수
         function updateChart() {
             const ctx = document.getElementById('studyChart').getContext('2d');
             let data = JSON.parse(localStorage.getItem('studyData') || '{}');
             
-            const labels = []; // x축 (날짜)
-            const chartData = []; // y축 (공부 시간 - 분 단위)
+            const labels = []; 
+            const chartData = []; 
             
-            // 최근 7일치 날짜 계산하기
             for (let i = 6; i >= 0; i--) {
                 let d = new Date();
                 d.setDate(d.getDate() - i);
@@ -121,20 +109,16 @@
                 const dateOffset = new Date(d.getTime() - offset);
                 const dateStr = dateOffset.toISOString().split('T')[0];
                 
-                // 'MM-DD' 형식으로 화면에 표시
                 labels.push(dateStr.substring(5)); 
                 
-                // 초 단위 데이터를 분 단위로 변환 (소수점 1자리까지 표시)
                 const secondsStudied = data[dateStr] || 0;
                 chartData.push((secondsStudied / 60).toFixed(1)); 
             }
 
-            // 기존에 그려진 그래프가 있다면 지우고 새로 그리기
             if (myChart) {
                 myChart.destroy(); 
             }
 
-            // Chart.js를 이용해 막대그래프 그리기
             myChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -142,7 +126,7 @@
                     datasets: [{
                         label: '공부 시간 (분)',
                         data: chartData,
-                        backgroundColor: '#0056b3', // 그래프 막대 색상
+                        backgroundColor: '#0056b3',
                         borderRadius: 5
                     }]
                 },
@@ -150,14 +134,18 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 30 // y축 눈금을 30분 단위로 강제 고정합니다
+                            }
+                        }
                     }
                 }
             });
         }
 
-
-        // === 2. 타이머 기능 ===
+        // === 3. 타이머 기능 ===
         let timerInterval = null;
         let seconds = 25 * 60; 
         let mode = 'pomodoro'; 
@@ -183,7 +171,6 @@
             isRunning = true;
             
             timerInterval = setInterval(function() {
-                // *** 타이머가 1초 흐를 때마다 공부 시간 저장 ***
                 addStudyTime();
 
                 if (mode === 'pomodoro') {
@@ -203,7 +190,6 @@
         function stopTimer() {
             isRunning = false;
             clearInterval(timerInterval); 
-            // 정지할 때 그래프 최신화
             updateChart(); 
         }
 
@@ -211,9 +197,7 @@
             setMode(mode); 
         }
 
-        // 웹사이트가 처음 열릴 때 그래프 한 번 그리기
         updateChart();
-
     </script>
 </body>
 </html>
