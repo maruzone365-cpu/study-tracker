@@ -19,14 +19,12 @@
         ul { list-style-type: none; padding: 0; }
         li { padding: 10px 0; border-bottom: 1px solid #eee; display: flex; align-items: center; }
         li input[type="checkbox"] { margin-right: 10px; transform: scale(1.5); cursor: pointer; }
-        /* 그래프가 너무 커지지 않도록 크기 조절 */
         #chart-container { position: relative; height: 300px; width: 100%; }
     </style>
 </head>
 <body>
     <h1>📚 스터디 및 목표 달성 트래커</h1>
     
-    <!-- 1. 할 일 (To-Do) 영역 -->
     <div class="section">
         <h2>오늘의 할 일</h2>
         <input type="text" id="todo-input" placeholder="할 일을 적고 추가 버튼을 누르세요">
@@ -34,7 +32,6 @@
         <ul id="todo-list"></ul>
     </div>
 
-    <!-- 2. 타이머 영역 -->
     <div class="section">
         <h2>타이머</h2>
         <div style="text-align: center;">
@@ -51,7 +48,6 @@
         </div>
     </div>
 
-    <!-- 3. 주간 그래프 영역 -->
     <div class="section">
         <h2>📊 주간 공부 통계 (단위: 분)</h2>
         <div id="chart-container">
@@ -136,8 +132,9 @@
                     scales: {
                         y: { 
                             beginAtZero: true,
+                            suggestedMax: 120, /* 최소 120분까지는 무조건 보여주도록 고정 */
                             ticks: {
-                                stepSize: 30 // y축 눈금을 30분 단위로 강제 고정합니다
+                                stepSize: 30 /* 무조건 30 단위로 선을 긋도록 설정 */
                             }
                         }
                     }
